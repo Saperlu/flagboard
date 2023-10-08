@@ -2,15 +2,8 @@ body {
   padding: 10px;
   font-family: sans-serif;
 }
-.task-form {
-  margin-top: 1rem;
-}
 
-.filter {
-  display: flex;
-  justify-content: center;
-}
-
-.filter > button {
-  background-color: #62807e;
+.flag_username {
+  padding: 10px;
+  font-weight: bold;
 }

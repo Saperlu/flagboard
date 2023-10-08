@@ -1,41 +1,42 @@
-import React, {useState} from "react";
+import React, {useEffect, useState, useRef } from "react";
 import { useTracker } from "meteor/react-meteor-data";
-import { Hello } from "./Hello.jsx";
-import { Task } from "./Task.jsx";
-import { TaskForm } from './TaskForm';
-import { TasksCollection } from "../api/TasksCollection.js";
+import { Flag } from "./Flag.jsx";
+import { FlagsCollection } from '../api/FlagsCollection.js';
 
 export const App = () => {
-  const [hideCompleted, setHideCompleted] = useState(false);
-  const hideCompletedFilter = { isChecked: { $ne: true } };
-  
-  const tasks = useTracker(() =>
-    TasksCollection.find(hideCompleted ? hideCompletedFilter : {}, {
-      sort: { createdAt: -1 },
+  const lastFlagsFetch = useRef(new Date())
+  const flags = useTracker(() =>
+    FlagsCollection.find({}, {
+      sort: { createdAt: 1 },
     }).fetch()
   );
 
-  const deleteTask = ({ _id }) => TasksCollection.remove(_id);
+  useEffect(() => {
+    console.debug(`effect : ${flags}`)
+    const now = new Date();
+    if(lastFlagsFetch - now < 10000) {
+      console.debug("ignored hook")
+      lastFlagsFetch = now
+      return;
+    }
+    if (flags.length == 1) {
+      console.log("FIRST BLOOD")
+      console.debug(flags)
+    } else if (flags.length > 1) {
+      console.log("new flag");
+      console.debug(flags)
+    }
+  }, [flags])
 
-  const toggleChecked = ({ _id, isChecked }) => {
-    TasksCollection.update(_id, {
-      $set: {
-        isChecked: !isChecked
-      }
-    })
-  };
+  
 
   return (
     <div className="main">
-      <TaskForm />
-      <div className="filter">
-      <button onClick={() => setHideCompleted(!hideCompleted)}>
-        {hideCompleted ? 'Show All' : 'Hide Completed'}
-      </button>
-      </div>
+
+      <h1>Les flags :</h1>
       <ul>
-        {tasks.map((t) => (
-          <Task key={t._id} task={t} onCheckboxClick={toggleChecked} onDeleteClick={deleteTask}></Task>
+        {flags.map((f) => (
+          <Flag key={f._id} flag={f}></Flag>
         ))}
       </ul>
     </div>
